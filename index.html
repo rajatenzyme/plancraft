@@ -1293,7 +1293,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <p class="text-gray-800 text-sm font-medium ${todo.completed ? 'line-through text-gray-500' : ''}">
+                        <p class="text-gray-800 text-sm font-medium ${todo.completed ? 'line-through text-gray-500' : ''} todo-text" contenteditable="true">
                             ${todo.text}
                         </p>
                     </div>
@@ -1344,6 +1344,33 @@
                 const moveTodoBtn = div.querySelector('.move-todo-btn');
                 const moveProgressBtn = div.querySelector('.move-progress-btn');
                 const moveDoneBtn = div.querySelector('.move-done-btn');
+                const textEl = div.querySelector('.todo-text');
+
+                // Inline editing behavior
+                if (textEl) {
+                    textEl.addEventListener('focus', () => {
+                        textEl.dataset.original = textEl.textContent.trim();
+                    });
+                    textEl.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            textEl.blur();
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            textEl.textContent = textEl.dataset.original || '';
+                            textEl.blur();
+                        }
+                    });
+                    textEl.addEventListener('blur', () => {
+                        const newText = (textEl.textContent || '').trim();
+                        const original = textEl.dataset.original || '';
+                        if (newText && newText !== original) {
+                            this.editTodo ? this.editTodo(todo.id, newText) : null;
+                        } else {
+                            textEl.textContent = original; // normalize whitespace
+                        }
+                    });
+                }
 
                 toggleBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1525,5 +1552,6 @@
             new TodoApp();
         });
     </script>
+    <script src="/app-api.js"></script>
 </body>
 </html>
