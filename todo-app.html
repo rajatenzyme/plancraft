@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Todo App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Dark Theme Styles */
+        .theme-dark {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%) !important;
+        }
+        .theme-dark nav {
+            background: rgba(31, 41, 55, 0.8) !important;
+            border-bottom-color: rgba(75, 85, 99, 0.5) !important;
+        }
+        .theme-dark h1 {
+            background: linear-gradient(45deg, #a78bfa, #60a5fa) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+        }
+        .theme-dark .bg-white {
+            background: #374151 !important;
+            color: #f9fafb !important;
+        }
+        .theme-dark .text-gray-800 {
+            color: #f9fafb !important;
+        }
+        .theme-dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+        .theme-dark .text-gray-500 {
+            color: #9ca3af !important;
+        }
+        .theme-dark .border-gray-200 {
+            border-color: #4b5563 !important;
+        }
+        .theme-dark input {
+            background: #4b5563 !important;
+            color: #f9fafb !important;
+            border-color: #6b7280 !important;
+        }
+        .theme-dark .bg-gray-50 {
+            background: #4b5563 !important;
+        }
+        .theme-dark .hover\\:bg-gray-100:hover {
+            background: #6b7280 !important;
+        }
+        
+        /* Dark Theme Modal Styles */
+        .theme-dark .bg-white {
+            background: #374151 !important;
+            color: #f9fafb !important;
+        }
+        .theme-dark select {
+            background: #4b5563 !important;
+            color: #f9fafb !important;
+            border-color: #6b7280 !important;
+        }
+        .theme-dark option {
+            background: #4b5563 !important;
+            color: #f9fafb !important;
+        }
+        .theme-dark label {
+            color: #f9fafb !important;
+        }
+        .theme-dark .text-gray-700 {
+            color: #f9fafb !important;
+        }
+        .theme-dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+        .theme-dark .border-gray-200 {
+            border-color: #4b5563 !important;
+        }
+        .theme-dark .bg-purple-50, .theme-dark .bg-green-50, .theme-dark .bg-blue-50 {
+            background: #4b5563 !important;
+        }
+        
+        /* Green Theme */
+        .theme-green nav {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+        .theme-green h1 {
+            background: linear-gradient(45deg, #059669, #10b981) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+        }
+        .theme-green .bg-gradient-to-r.from-purple-500.to-blue-500 {
+            background: linear-gradient(45deg, #059669, #10b981) !important;
+        }
+        
+        /* Orange Theme */
+        .theme-orange nav {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+        .theme-orange h1 {
+            background: linear-gradient(45deg, #ea580c, #f97316) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+        }
+        .theme-orange .bg-gradient-to-r.from-purple-500.to-blue-500 {
+            background: linear-gradient(45deg, #ea580c, #f97316) !important;
+        }
+        
+        /* Kanban Board Styles */
+        .kanban-column {
+            transition: all 0.3s ease;
+        }
+        .kanban-column:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .kanban-task {
+            cursor: grab;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .kanban-task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .kanban-task.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            cursor: grabbing;
+        }
+        .kanban-task.todo-status {
+            border-left-color: #f87171;
+        }
+        .kanban-task.progress-status {
+            border-left-color: #fbbf24;
+        }
+        .kanban-task.done-status {
+            border-left-color: #34d399;
+        }
+        .kanban-tasks.drag-over {
+            background-color: rgba(147, 197, 253, 0.1);
+            border-color: #3b82f6;
+        }
+        .kanban-tasks.drag-active {
+            border-color: #a78bfa;
+            background-color: rgba(167, 139, 250, 0.05);
+        }
+        
+        /* SortableJS specific styles */
+        .sortable-ghost {
+            opacity: 0.3;
+            transform: rotate(5deg);
+            background: #f3f4f6 !important;
+        }
+        .sortable-chosen {
+            cursor: grabbing !important;
+        }
+        .sortable-drag {
+            transform: rotate(5deg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        }
+        .sortable-fallback {
+            opacity: 0.7;
+            transform: rotate(5deg);
+        }
+        
+        /* Dark theme for Kanban */
+        .theme-dark .kanban-column {
+            background: #4b5563 !important;
+            border-color: #6b7280 !important;
+        }
+        .theme-dark .bg-gray-50 {
+            background: #4b5563 !important;
+        }
+        .theme-dark .bg-blue-50 {
+            background: #374151 !important;
+        }
+        .theme-dark .bg-green-50 {
+            background: #374151 !important;
+        }
+        
+        /* Responsive Kanban adjustments */
+        @media (max-width: 768px) {
+            .kanban-task {
+                font-size: 0.875rem;
+            }
+            .kanban-task .text-xs {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            .kanban-column {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            .kanban-tasks {
+                max-height: calc(80vh - 4rem);
+            }
+        }
+        
+        /* Better scrollbars for columns */
+        .kanban-column::-webkit-scrollbar {
+            width: 6px;
+        }
+        .kanban-column::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        .kanban-column::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        .kanban-column::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+    <!-- Modern Navbar -->
+    <nav class="bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <i class="fas fa-check-double text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                            PlanCraft by Rajat
+                        </h1>
+                        <p class="text-xs text-gray-500 font-medium">Craft your perfect plan</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-2 rounded-full border border-purple-200">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span id="taskCount" class="text-purple-800 text-sm font-semibold">
+                                0 tasks
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <button id="statsBtn" class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 group relative">
+                                <i class="fas fa-chart-bar group-hover:scale-110 transition-transform"></i>
+                                <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Statistics
+                                </span>
+                            </button>
+                            <button id="settingsBtn" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 group relative">
+                                <i class="fas fa-cog group-hover:rotate-90 transition-transform duration-300"></i>
+                                <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Settings
+                                </span>
+                            </button>
+                            <button id="clearAll" class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group relative">
+                                <i class="fas fa-trash-alt group-hover:scale-110 transition-transform"></i>
+                                <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Clear All
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- User Profile (when logged in) -->
+                    <div class="hidden items-center space-x-3" id="userProfile">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm font-bold" id="userInitial">G</span>
+                        </div>
+                        <div class="text-sm">
+                            <div class="text-gray-800 font-medium" id="userName">Guest</div>
+                            <div class="text-gray-500 text-xs" id="userPlan">Not logged in</div>
+                        </div>
+                        <button id="logoutButton" class="ml-4 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg font-medium transition-all hidden">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                    
+                    <!-- Auth Buttons (when not logged in) -->
+                    <div class="flex items-center space-x-2" id="authButtons">
+                        <button id="loginBtn" class="px-4 py-2 text-purple-600 hover:text-purple-800 font-medium transition-colors">
+                            Login
+                        </button>
+                        <button id="signupBtn" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all">
+                            Sign Up
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Add Todo Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+            <div class="flex space-x-3">
+                <input 
+                    type="text" 
+                    id="todoInput" 
+                    placeholder="What needs to be done?" 
+                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors duration-200 text-gray-700"
+                >
+                <button 
+                    id="addBtn" 
+                    class="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                    <i class="fas fa-plus mr-2"></i>Add Task
+                </button>
+            </div>
+        </div>
+
+        <!-- Kanban Board Container -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-blue-500 p-4">
+                <h2 class="text-white text-xl font-semibold flex items-center">
+                    <i class="fas fa-columns mr-3"></i>Kanban Board
+                </h2>
+            </div>
+            
+            <!-- Kanban Columns -->
+            <div class="p-4 lg:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 min-h-[500px]">
+                    <!-- To Do Column -->
+                    <div class="kanban-column bg-gray-50 rounded-xl p-3 lg:p-4 border-2 border-dashed border-gray-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-gray-700 flex items-center text-sm lg:text-base">
+                                <div class="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
+                                To Do
+                                <span class="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full" id="todoCount">0</span>
+                            </h3>
+                        </div>
+                        <div id="todoColumn" class="kanban-tasks space-y-3 min-h-[300px] lg:min-h-[400px]">
+                            <!-- Tasks will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- In Progress Column -->
+                    <div class="kanban-column bg-blue-50 rounded-xl p-3 lg:p-4 border-2 border-dashed border-blue-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-gray-700 flex items-center text-sm lg:text-base">
+                                <div class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                                In Progress
+                                <span class="ml-2 bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full" id="progressCount">0</span>
+                            </h3>
+                        </div>
+                        <div id="progressColumn" class="kanban-tasks space-y-3 min-h-[300px] lg:min-h-[400px]">
+                            <!-- Tasks will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Done Column -->
+                    <div class="kanban-column bg-green-50 rounded-xl p-3 lg:p-4 border-2 border-dashed border-green-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-gray-700 flex items-center text-sm lg:text-base">
+                                <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                                Done
+                                <span class="ml-2 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full" id="doneCount">0</span>
+                            </h3>
+                        </div>
+                        <div id="doneColumn" class="kanban-tasks space-y-3 min-h-[300px] lg:min-h-[400px]">
+                            <!-- Tasks will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State for Kanban -->
+                <div id="kanbanEmptyState" class="text-center py-12 text-gray-400 hidden">
+                    <i class="fas fa-clipboard-list text-6xl mb-4"></i>
+                    <p class="text-lg">No tasks yet. Add one above to get started!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 transform scale-95 opacity-0 transition-all duration-300" id="settingsContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Settings</h3>
+                <button id="closeSettings" class="text-gray-400 hover:text-gray-600 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                    <select id="themeSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="default">Default (Purple/Blue)</option>
+                        <option value="dark">Dark Mode</option>
+                        <option value="green">Nature (Green)</option>
+                        <option value="orange">Sunset (Orange)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Auto-save</label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="autoSave" checked class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <span class="ml-2 text-sm text-gray-600">Automatically save tasks</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notifications</label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="notifications" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <span class="ml-2 text-sm text-gray-600">Enable notifications</span>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-200">
+                    <button id="exportData" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors">
+                        Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4 transform scale-95 opacity-0 transition-all duration-300" id="statsContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Statistics</h3>
+                <button id="closeStats" class="text-gray-400 hover:text-gray-600 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-purple-50 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="totalTasks">0</div>
+                        <div class="text-sm text-gray-600">Total Tasks</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-green-600" id="completedTasks">0</div>
+                        <div class="text-sm text-gray-600">Completed</div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-xl">
+                    <div class="text-sm text-gray-600 mb-2">Completion Rate</div>
+                    <div class="bg-gray-200 rounded-full h-3">
+                        <div id="completionBar" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="text-right text-sm text-gray-600 mt-1" id="completionPercent">0%</div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tasks created today:</span>
+                        <span id="todayTasks" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Average per day:</span>
+                        <span id="avgTasks" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Most productive day:</span>
+                        <span id="bestDay" class="font-semibold">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 transform scale-95 opacity-0 transition-all duration-300" id="loginContent">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
+                <p class="text-gray-600">Sign in to your PlanCraft account</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="your@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="••••••••">
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-purple-600 hover:text-purple-800">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">Don't have an account? 
+                    <button id="switchToSignup" class="text-purple-600 hover:text-purple-800 font-medium">Sign up</button>
+                </p>
+            </div>
+            
+            <button id="closeLogin" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 transform scale-95 opacity-0 transition-all duration-300" id="signupContent">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-plus text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Join PlanCraft!</h2>
+                <p class="text-gray-600">Create your account and start organizing</p>
+            </div>
+            
+            <form id="signupForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="signupName" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="John Doe">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="signupEmail" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="your@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="signupPassword" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="••••••••">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="••••••••">
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="agreeTerms" required class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-gray-600">I agree to the <a href="#" class="text-purple-600 hover:text-purple-800">Terms and Conditions</a></span>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">Already have an account? 
+                    <button id="switchToLogin" class="text-purple-600 hover:text-purple-800 font-medium">Sign in</button>
+                </p>
+            </div>
+            
+            <button id="closeSignup" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Awesome Footer -->
+    <footer class="bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white mt-16">
+        <div class="max-w-6xl mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand Section -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-double text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">PlanCraft by Rajat</h3>
+                    </div>
+                    <p class="text-purple-200 mb-6 max-w-md">
+                        Transform your productivity with our intuitive task management system. 
+                        Craft your perfect plan and achieve your goals effortlessly.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                            <i class="fab fa-twitter text-blue-400"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                            <i class="fab fa-github text-gray-300"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                            <i class="fab fa-linkedin text-blue-500"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                            <i class="fas fa-envelope text-purple-400"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-200">Features</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-arrow-right text-xs mr-2"></i>Task Management</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-arrow-right text-xs mr-2"></i>Statistics & Analytics</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-arrow-right text-xs mr-2"></i>Theme Customization</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-arrow-right text-xs mr-2"></i>Data Export</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-arrow-right text-xs mr-2"></i>Drag & Drop</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-200">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-question-circle text-xs mr-2"></i>Help Center</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-bug text-xs mr-2"></i>Report Bug</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-lightbulb text-xs mr-2"></i>Feature Request</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-shield-alt text-xs mr-2"></i>Privacy Policy</a></li>
+                        <li><a href="#" class="text-purple-300 hover:text-white transition-colors flex items-center"><i class="fas fa-file-contract text-xs mr-2"></i>Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="border-t border-white/20 mt-8 pt-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
+                        <div class="text-2xl font-bold text-purple-300" id="footerTotalTasks">0+</div>
+                        <div class="text-xs text-purple-200">Tasks Created</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
+                        <div class="text-2xl font-bold text-blue-300" id="footerCompletedTasks">0+</div>
+                        <div class="text-xs text-purple-200">Tasks Completed</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
+                        <div class="text-2xl font-bold text-green-300">100%</div>
+                        <div class="text-xs text-purple-200">Uptime</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
+                        <div class="text-2xl font-bold text-yellow-300">4.9★</div>
+                        <div class="text-xs text-purple-200">User Rating</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="border-t border-white/20 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-6 mb-4 md:mb-0">
+                    <p class="text-sm text-purple-200">
+                        © 2024 PlanCraft by Rajat. All rights reserved.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-xs text-purple-300">Made with</span>
+                    <i class="fas fa-heart text-red-400 animate-pulse"></i>
+                    <span class="text-xs text-purple-300">and</span>
+                    <i class="fas fa-code text-blue-400"></i>
+                    <span class="text-xs text-purple-300">by Rajat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating particles animation -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute w-2 h-2 bg-purple-400 rounded-full opacity-60 animate-bounce" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+            <div class="absolute w-1 h-1 bg-blue-400 rounded-full opacity-40 animate-bounce" style="top: 60%; left: 80%; animation-delay: 1s;"></div>
+            <div class="absolute w-3 h-3 bg-indigo-400 rounded-full opacity-30 animate-bounce" style="top: 80%; left: 20%; animation-delay: 2s;"></div>
+        </div>
+    </footer>
+
+    <script>
+        class TodoApp {
+            constructor() {
+                this.currentUser = null;
+                this.todos = [];
+                this.todoInput = document.getElementById('todoInput');
+                this.addBtn = document.getElementById('addBtn');
+                this.taskCount = document.getElementById('taskCount');
+                this.clearAllBtn = document.getElementById('clearAll');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                this.statsBtn = document.getElementById('statsBtn');
+                this.settingsModal = document.getElementById('settingsModal');
+                this.statsModal = document.getElementById('statsModal');
+                
+                // Authentication elements
+                this.loginModal = document.getElementById('loginModal');
+                this.signupModal = document.getElementById('signupModal');
+                this.authButtons = document.getElementById('authButtons');
+                this.userProfile = document.getElementById('userProfile');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.signupBtn = document.getElementById('signupBtn');
+                this.logoutButton = document.getElementById('logoutButton');
+                
+                // Kanban columns
+                this.todoColumn = document.getElementById('todoColumn');
+                this.progressColumn = document.getElementById('progressColumn');
+                this.doneColumn = document.getElementById('doneColumn');
+                this.kanbanEmptyState = document.getElementById('kanbanEmptyState');
+                
+                this.checkAuthStatus();
+                this.initEventListeners();
+                this.renderKanbanBoard();
+                this.initKanbanDragDrop();
+                this.loadSettings();
+            }
+
+            initEventListeners() {
+                this.addBtn.addEventListener('click', () => this.addTodo());
+                this.todoInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTodo();
+                });
+                this.clearAllBtn.addEventListener('click', () => this.clearAll());
+                this.settingsBtn.addEventListener('click', () => this.openSettings());
+                this.statsBtn.addEventListener('click', () => this.openStats());
+                
+                // Modal close events
+                document.getElementById('closeSettings').addEventListener('click', () => this.closeSettings());
+                document.getElementById('closeStats').addEventListener('click', () => this.closeStats());
+                
+                // Settings events
+                document.getElementById('themeSelect').addEventListener('change', (e) => this.changeTheme(e.target.value));
+                document.getElementById('exportData').addEventListener('click', () => this.exportData());
+                
+                // Close modals on outside click
+                this.settingsModal.addEventListener('click', (e) => {
+                    if (e.target === this.settingsModal) this.closeSettings();
+                });
+                this.statsModal.addEventListener('click', (e) => {
+                    if (e.target === this.statsModal) this.closeStats();
+                });
+                
+                // Authentication events
+                this.loginBtn.addEventListener('click', () => this.openLogin());
+                this.signupBtn.addEventListener('click', () => this.openSignup());
+                document.getElementById('closeLogin').addEventListener('click', () => this.closeLogin());
+                document.getElementById('closeSignup').addEventListener('click', () => this.closeSignup());
+                document.getElementById('switchToSignup').addEventListener('click', () => this.switchToSignup());
+                document.getElementById('switchToLogin').addEventListener('click', () => this.switchToLogin());
+                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+                document.getElementById('signupForm').addEventListener('submit', (e) => this.handleSignup(e));
+                this.logoutButton.addEventListener('click', () => this.logout());
+                
+                // Close auth modals on outside click
+                this.loginModal.addEventListener('click', (e) => {
+                    if (e.target === this.loginModal) this.closeLogin();
+                });
+                this.signupModal.addEventListener('click', (e) => {
+                    if (e.target === this.signupModal) this.closeSignup();
+                });
+                
+            }
+
+            // Authentication Methods
+            checkAuthStatus() {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    this.currentUser = JSON.parse(savedUser);
+                    this.todos = this.loadTodos();
+                    this.updateUIForAuthenticatedUser();
+                } else {
+                    this.updateUIForGuestUser();
+                }
+            }
+
+            updateUIForAuthenticatedUser() {
+                // Hide auth buttons completely
+                this.authButtons.classList.add('hidden');
+                this.authButtons.classList.remove('flex');
+                
+                // Show user profile with flex
+                this.userProfile.classList.remove('hidden');
+                this.userProfile.classList.add('flex');
+                this.logoutButton.classList.remove('hidden');
+                
+                document.getElementById('userInitial').textContent = this.currentUser.name.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = this.currentUser.name;
+                document.getElementById('userPlan').textContent = 'Pro Plan';
+            }
+
+            updateUIForGuestUser() {
+                // Show auth buttons with flex
+                this.authButtons.classList.remove('hidden');
+                this.authButtons.classList.add('flex');
+                
+                // Hide user profile completely
+                this.userProfile.classList.add('hidden');
+                this.userProfile.classList.remove('flex');
+                this.logoutButton.classList.add('hidden');
+            }
+
+            openLogin() {
+                this.loginModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('loginContent').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('loginContent').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            closeLogin() {
+                document.getElementById('loginContent').classList.remove('scale-100', 'opacity-100');
+                document.getElementById('loginContent').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    this.loginModal.classList.add('hidden');
+                }, 300);
+            }
+
+            openSignup() {
+                this.signupModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('signupContent').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('signupContent').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            closeSignup() {
+                document.getElementById('signupContent').classList.remove('scale-100', 'opacity-100');
+                document.getElementById('signupContent').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    this.signupModal.classList.add('hidden');
+                }, 300);
+            }
+
+            switchToSignup() {
+                this.closeLogin();
+                setTimeout(() => this.openSignup(), 300);
+            }
+
+            switchToLogin() {
+                this.closeSignup();
+                setTimeout(() => this.openLogin(), 300);
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const user = await this.authenticateUser(email, password);
+                    if (user) {
+                        this.currentUser = user;
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        this.todos = this.loadTodos();
+                        this.updateUIForAuthenticatedUser();
+                        this.renderKanbanBoard();
+                        this.closeLogin();
+                        this.showSuccessMessage('Welcome back! You\'re now logged in.');
+                    } else {
+                        this.showErrorMessage('Invalid email or password. Please try again.');
+                    }
+                } catch (error) {
+                    this.showErrorMessage('Login failed. Please try again.');
+                }
+            }
+
+            async handleSignup(e) {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (password !== confirmPassword) {
+                    this.showErrorMessage('Passwords do not match.');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showErrorMessage('Password must be at least 6 characters long.');
+                    return;
+                }
+
+                try {
+                    const user = await this.createUser(name, email, password);
+                    if (user) {
+                        this.currentUser = user;
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        this.todos = [];
+                        this.updateUIForAuthenticatedUser();
+                        this.renderKanbanBoard();
+                        this.closeSignup();
+                        this.showSuccessMessage('Account created successfully! Welcome to PlanCraft.');
+                    } else {
+                        this.showErrorMessage('Email already exists. Please use a different email.');
+                    }
+                } catch (error) {
+                    this.showErrorMessage('Signup failed. Please try again.');
+                }
+            }
+
+            async authenticateUser(email, password) {
+                // Simulate API call - In real app, this would call your MongoDB backend
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return user || null;
+            }
+
+            async createUser(name, email, password) {
+                // Simulate API call - In real app, this would call your MongoDB backend
+                let users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // Check if user already exists
+                if (users.find(u => u.email === email)) {
+                    return null;
+                }
+
+                const newUser = {
+                    id: Date.now(),
+                    name,
+                    email,
+                    password, // In real app, this would be hashed
+                    createdAt: new Date().toISOString(),
+                    plan: 'pro'
+                };
+
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                return newUser;
+            }
+
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+                this.todos = [];
+                this.updateUIForGuestUser();
+                this.renderKanbanBoard();
+                this.showSuccessMessage('You have been logged out successfully.');
+            }
+
+            showSuccessMessage(message) {
+                this.showNotification(message, 'success');
+            }
+
+            showErrorMessage(message) {
+                this.showNotification(message, 'error');
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+                
+                notification.className = `fixed top-20 right-4 ${bgColor} text-white rounded-lg shadow-lg p-4 z-50 transform translate-x-full transition-transform duration-300`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 10);
+                
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            initKanbanDragDrop() {
+                // Destroy existing sortable instances if they exist
+                if (this.sortableInstances) {
+                    this.sortableInstances.forEach(instance => instance.destroy());
+                }
+                this.sortableInstances = [];
+
+                // Initialize sortable for each column
+                const columns = [this.todoColumn, this.progressColumn, this.doneColumn];
+                const statuses = ['todo', 'progress', 'done'];
+                
+                columns.forEach((column, index) => {
+                    const sortableInstance = Sortable.create(column, {
+                        group: 'kanban-board',
+                        animation: 200,
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        filter: 'button, input',
+                        preventOnFilter: false,
+                        forceFallback: false,
+                        fallbackClass: 'sortable-fallback',
+                        onStart: (evt) => {
+                            evt.item.classList.add('dragging');
+                            document.querySelectorAll('.kanban-tasks').forEach(col => {
+                                col.classList.add('drag-active');
+                            });
+                        },
+                        onEnd: (evt) => {
+                            evt.item.classList.remove('dragging');
+                            document.querySelectorAll('.kanban-tasks').forEach(col => {
+                                col.classList.remove('drag-active', 'drag-over');
+                            });
+                        },
+                        onAdd: (evt) => {
+                            const taskId = parseInt(evt.item.dataset.id);
+                            const newStatus = statuses[index];
+                            this.updateTaskStatus(taskId, newStatus);
+                        },
+                        onUpdate: () => {
+                            this.updateKanbanOrder();
+                        },
+                        onMove: (evt) => {
+                            // Add visual feedback when dragging over columns
+                            const targetColumn = evt.to;
+                            if (targetColumn) {
+                                targetColumn.classList.add('drag-over');
+                            }
+                            return true;
+                        }
+                    });
+                    this.sortableInstances.push(sortableInstance);
+                });
+            }
+
+            updateKanbanOrder() {
+                // Update the order of tasks within columns
+                const columns = [this.todoColumn, this.progressColumn, this.doneColumn];
+                const statuses = ['todo', 'progress', 'done'];
+                
+                let newTodos = [];
+                
+                columns.forEach((column, index) => {
+                    const taskElements = Array.from(column.querySelectorAll('.kanban-task'));
+                    taskElements.forEach((element, order) => {
+                        const taskId = parseInt(element.dataset.id);
+                        const task = this.todos.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = statuses[index];
+                            task.order = order;
+                            newTodos.push(task);
+                        }
+                    });
+                });
+                
+                this.todos = newTodos;
+                this.saveTodos();
+            }
+
+            updateTaskStatus(taskId, newStatus) {
+                const task = this.todos.find(t => t.id === taskId);
+                if (task) {
+                    task.status = newStatus;
+                    if (newStatus === 'done') {
+                        task.completed = true;
+                    } else {
+                        task.completed = false;
+                    }
+                    this.saveTodos();
+                    this.renderKanbanBoard();
+                }
+            }
+
+            moveTaskToStatus(taskId, newStatus) {
+                const task = this.todos.find(t => t.id === taskId);
+                if (task && task.status !== newStatus) {
+                    task.status = newStatus;
+                    if (newStatus === 'done') {
+                        task.completed = true;
+                    } else {
+                        task.completed = false;
+                    }
+                    this.saveTodos();
+                    this.renderKanbanBoard();
+                    
+                    // Add a subtle animation feedback
+                    this.showMoveNotification(task.text, newStatus);
+                }
+            }
+
+            showMoveNotification(taskText, status) {
+                const statusNames = {
+                    'todo': 'To Do',
+                    'progress': 'In Progress', 
+                    'done': 'Completed'
+                };
+                
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-4 bg-white border-l-4 border-purple-500 rounded-lg shadow-lg p-4 z-50 transform translate-x-full transition-transform duration-300';
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Task moved!</p>
+                            <p class="text-xs text-gray-500">"${taskText.substring(0, 30)}${taskText.length > 30 ? '...' : ''}" → ${statusNames[status]}</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 10);
+                
+                // Animate out and remove
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            }
+
+            addTodo() {
+                const text = this.todoInput.value.trim();
+                if (text === '') return;
+
+                const todo = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    status: 'todo', // Default to todo column
+                    createdAt: new Date().toISOString()
+                };
+
+                this.todos.push(todo);
+                this.saveTodos();
+                this.renderKanbanBoard();
+                this.todoInput.value = '';
+            }
+
+            deleteTodo(id) {
+                this.todos = this.todos.filter(todo => todo.id !== id);
+                this.saveTodos();
+                this.renderKanbanBoard();
+            }
+
+            toggleTodo(id) {
+                const todo = this.todos.find(todo => todo.id === id);
+                if (todo) {
+                    if (todo.completed) {
+                        // If unchecking, move to progress
+                        todo.completed = false;
+                        todo.status = 'progress';
+                    } else {
+                        // If checking, move to done
+                        todo.completed = true;
+                        todo.status = 'done';
+                    }
+                    this.saveTodos();
+                    this.renderKanbanBoard();
+                }
+            }
+
+            updateTodoOrder() {
+                const todoElements = Array.from(this.todoList.querySelectorAll('.todo-item'));
+                const newOrder = [];
+                
+                todoElements.forEach(element => {
+                    const id = parseInt(element.dataset.id);
+                    const todo = this.todos.find(t => t.id === id);
+                    if (todo) newOrder.push(todo);
+                });
+                
+                this.todos = newOrder;
+                this.saveTodos();
+            }
+
+            clearAll() {
+                if (this.todos.length === 0) return;
+                if (confirm('Are you sure you want to delete all tasks?')) {
+                    this.todos = [];
+                    this.saveTodos();
+                    this.renderKanbanBoard();
+                }
+            }
+
+            renderKanbanBoard() {
+                // Clear all columns
+                this.todoColumn.innerHTML = '';
+                this.progressColumn.innerHTML = '';
+                this.doneColumn.innerHTML = '';
+                
+                if (this.todos.length === 0) {
+                    this.kanbanEmptyState.classList.remove('hidden');
+                    this.taskCount.textContent = '0 tasks';
+                    this.updateColumnCounts();
+                    this.updateFooterStats();
+                    return;
+                }
+
+                this.kanbanEmptyState.classList.add('hidden');
+
+                // Add existing todos to correct columns based on status
+                this.todos.forEach(todo => {
+                    // Ensure status exists (for backward compatibility)
+                    if (!todo.status) {
+                        todo.status = todo.completed ? 'done' : 'todo';
+                    }
+                    
+                    const todoElement = this.createKanbanTaskElement(todo);
+                    
+                    switch(todo.status) {
+                        case 'todo':
+                            this.todoColumn.appendChild(todoElement);
+                            break;
+                        case 'progress':
+                            this.progressColumn.appendChild(todoElement);
+                            break;
+                        case 'done':
+                            this.doneColumn.appendChild(todoElement);
+                            break;
+                        default:
+                            this.todoColumn.appendChild(todoElement);
+                    }
+                });
+
+                this.updateColumnCounts();
+                this.updateFooterStats();
+                
+                // Re-initialize drag and drop after rendering
+                setTimeout(() => {
+                    this.initKanbanDragDrop();
+                }, 100);
+            }
+
+            updateColumnCounts() {
+                const todoCount = this.todos.filter(t => t.status === 'todo').length;
+                const progressCount = this.todos.filter(t => t.status === 'progress').length;
+                const doneCount = this.todos.filter(t => t.status === 'done').length;
+                
+                document.getElementById('todoCount').textContent = todoCount;
+                document.getElementById('progressCount').textContent = progressCount;
+                document.getElementById('doneCount').textContent = doneCount;
+                
+                const totalTasks = this.todos.length;
+                this.taskCount.textContent = `${totalTasks} tasks (${doneCount} completed)`;
+            }
+
+            updateFooterStats() {
+                const total = this.todos.length;
+                const completed = this.todos.filter(t => t.completed).length;
+                
+                document.getElementById('footerTotalTasks').textContent = `${total}+`;
+                document.getElementById('footerCompletedTasks').textContent = `${completed}+`;
+            }
+
+            createKanbanTaskElement(todo) {
+                const div = document.createElement('div');
+                const statusClass = `${todo.status}-status`;
+                div.className = `kanban-task bg-white hover:bg-gray-50 rounded-lg p-3 border border-gray-200 shadow-sm ${statusClass} ${todo.completed ? 'opacity-75' : ''}`;
+                div.dataset.id = todo.id;
+                
+                div.innerHTML = `
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full ${todo.status === 'todo' ? 'bg-red-400' : todo.status === 'progress' ? 'bg-yellow-400' : 'bg-green-400'}"></div>
+                        </div>
+                        <button class="delete-btn text-gray-400 hover:text-red-500 transition-colors duration-200">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="text-gray-800 text-sm font-medium ${todo.completed ? 'line-through text-gray-500' : ''}">
+                            ${todo.text}
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            ${new Date(todo.createdAt).toLocaleDateString()}
+                        </span>
+                        <div class="flex items-center space-x-1 drag-handle cursor-grab hover:cursor-grabbing">
+                            <i class="fas fa-grip-vertical text-gray-400 hover:text-purple-500 transition-colors"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <div class="flex space-x-1">
+                            ${todo.status !== 'todo' ? `
+                                <button class="move-todo-btn px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 text-xs rounded transition-colors" title="Move to To Do">
+                                    <i class="fas fa-arrow-left mr-1"></i>To Do
+                                </button>
+                            ` : ''}
+                            ${todo.status !== 'progress' ? `
+                                <button class="move-progress-btn px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 text-xs rounded transition-colors" title="Move to In Progress">
+                                    <i class="fas fa-play mr-1"></i>Progress
+                                </button>
+                            ` : ''}
+                            ${todo.status !== 'done' ? `
+                                <button class="move-done-btn px-2 py-1 bg-green-100 hover:bg-green-200 text-green-600 text-xs rounded transition-colors" title="Mark Complete">
+                                    <i class="fas fa-check mr-1"></i>Done
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${todo.status === 'done' ? `
+                            <button class="toggle-btn text-green-500 hover:text-green-700 transition-colors" title="Mark as completed">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                        ` : `
+                            <button class="toggle-btn text-gray-400 hover:text-green-500 transition-colors" title="Mark as completed">
+                                <i class="far fa-circle"></i>
+                            </button>
+                        `}
+                    </div>
+                `;
+
+                const toggleBtn = div.querySelector('.toggle-btn');
+                const deleteBtn = div.querySelector('.delete-btn');
+                const moveTodoBtn = div.querySelector('.move-todo-btn');
+                const moveProgressBtn = div.querySelector('.move-progress-btn');
+                const moveDoneBtn = div.querySelector('.move-done-btn');
+
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleTodo(todo.id);
+                });
+
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteTodo(todo.id);
+                });
+
+                if (moveTodoBtn) {
+                    moveTodoBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.moveTaskToStatus(todo.id, 'todo');
+                    });
+                }
+
+                if (moveProgressBtn) {
+                    moveProgressBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.moveTaskToStatus(todo.id, 'progress');
+                    });
+                }
+
+                if (moveDoneBtn) {
+                    moveDoneBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.moveTaskToStatus(todo.id, 'done');
+                    });
+                }
+
+                return div;
+            }
+
+            loadTodos() {
+                if (!this.currentUser) return [];
+                const saved = localStorage.getItem(`todos_${this.currentUser.id}`);
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveTodos() {
+                if (!this.currentUser) return;
+                localStorage.setItem(`todos_${this.currentUser.id}`, JSON.stringify(this.todos));
+            }
+
+            // Settings Methods
+            openSettings() {
+                this.settingsModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('settingsContent').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('settingsContent').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            closeSettings() {
+                document.getElementById('settingsContent').classList.remove('scale-100', 'opacity-100');
+                document.getElementById('settingsContent').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    this.settingsModal.classList.add('hidden');
+                }, 300);
+            }
+
+            loadSettings() {
+                const settings = JSON.parse(localStorage.getItem('todoSettings') || '{}');
+                if (settings.theme) {
+                    document.getElementById('themeSelect').value = settings.theme;
+                    this.changeTheme(settings.theme);
+                }
+                if (settings.autoSave !== undefined) {
+                    document.getElementById('autoSave').checked = settings.autoSave;
+                }
+                if (settings.notifications !== undefined) {
+                    document.getElementById('notifications').checked = settings.notifications;
+                }
+            }
+
+            changeTheme(theme) {
+                const body = document.body;
+                // Remove all theme classes
+                body.classList.remove('theme-dark', 'theme-green', 'theme-orange');
+                body.className = body.className.replace(/bg-\S+/g, '').replace(/text-\S+/g, '').replace(/from-\S+/g, '').replace(/to-\S+/g, '');
+                
+                if (theme === 'dark') {
+                    body.classList.add('theme-dark', 'min-h-screen');
+                } else if (theme === 'green') {
+                    body.classList.add('theme-green', 'bg-gradient-to-br', 'from-green-50', 'to-emerald-50', 'min-h-screen');
+                } else if (theme === 'orange') {
+                    body.classList.add('theme-orange', 'bg-gradient-to-br', 'from-orange-50', 'to-red-50', 'min-h-screen');
+                } else {
+                    body.classList.add('bg-gradient-to-br', 'from-purple-50', 'to-blue-50', 'min-h-screen');
+                }
+
+                const settings = JSON.parse(localStorage.getItem('todoSettings') || '{}');
+                settings.theme = theme;
+                localStorage.setItem('todoSettings', JSON.stringify(settings));
+            }
+
+            exportData() {
+                const data = {
+                    todos: this.todos,
+                    settings: JSON.parse(localStorage.getItem('todoSettings') || '{}'),
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `todo-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('Data exported successfully!');
+            }
+
+            // Statistics Methods
+            openStats() {
+                this.updateStats();
+                this.statsModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('statsContent').classList.remove('scale-95', 'opacity-0');
+                    document.getElementById('statsContent').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            closeStats() {
+                document.getElementById('statsContent').classList.remove('scale-100', 'opacity-100');
+                document.getElementById('statsContent').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    this.statsModal.classList.add('hidden');
+                }, 300);
+            }
+
+            updateStats() {
+                const total = this.todos.length;
+                const completed = this.todos.filter(t => t.completed).length;
+                const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+                
+                document.getElementById('totalTasks').textContent = total;
+                document.getElementById('completedTasks').textContent = completed;
+                document.getElementById('completionPercent').textContent = `${completionRate}%`;
+                document.getElementById('completionBar').style.width = `${completionRate}%`;
+
+                // Calculate today's tasks
+                const today = new Date().toDateString();
+                const todayTasks = this.todos.filter(t => new Date(t.createdAt).toDateString() === today).length;
+                document.getElementById('todayTasks').textContent = todayTasks;
+
+                // Calculate average tasks per day
+                const dates = [...new Set(this.todos.map(t => new Date(t.createdAt).toDateString()))];
+                const avgTasks = dates.length > 0 ? Math.round(total / dates.length * 10) / 10 : 0;
+                document.getElementById('avgTasks').textContent = avgTasks;
+
+                // Find most productive day (based on completed tasks)
+                const completedByDay = {};
+                this.todos.forEach(t => {
+                    if (t.completed) {
+                        const day = new Date(t.createdAt).toDateString();
+                        completedByDay[day] = (completedByDay[day] || 0) + 1;
+                    }
+                });
+                
+                let bestDay = '-';
+                let maxCompleted = 0;
+                Object.entries(completedByDay).forEach(([day, count]) => {
+                    if (count > maxCompleted) {
+                        maxCompleted = count;
+                        bestDay = new Date(day).toLocaleDateString();
+                    }
+                });
+                document.getElementById('bestDay').textContent = maxCompleted > 0 ? `${bestDay} (${maxCompleted} completed)` : '-';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new TodoApp();
+        });
+    </script>
+</body>
+</html>
